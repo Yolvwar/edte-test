@@ -25,6 +25,47 @@ export default function DocumentDetail({ documentId }) {
     const service = services.find(s => s.id === serviceId);
     return service ? service.name : 'Service inconnu';
   };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'validé':
+        return <Badge className="bg-green-100 text-green-600">Validé</Badge>;
+      case 'rejeté':
+        return <Badge className="bg-red-100 text-red-600">Rejeté</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+  
+  // Grouper l'historique par cycle de validation
+  const groupHistoryByCycles = () => {
+    const cycles = [];
+    let currentCycle = [];
+    
+    // Si l'historique est vide, retourner un tableau vide
+    if (!document.history || document.history.length === 0) {
+      return [];
+    }
+    
+    document.history.forEach((entry, index) => {
+      // Ajouter l'entrée au cycle courant
+      currentCycle.push(entry);
+      
+      // Si l'entrée est un rejet ou c'est la dernière entrée, fermer le cycle
+      if (entry.status === 'rejeté' || index === document.history.length - 1) {
+        cycles.push([...currentCycle]);
+        
+        // Si c'est un rejet, réinitialiser le cycle courant
+        if (entry.status === 'rejeté') {
+          currentCycle = [];
+        }
+      }
+    });
+    
+    return cycles;
+  };
+  
+  const historyCycles = groupHistoryByCycles();
   
   return (
     <div className="space-y-6">
@@ -73,8 +114,8 @@ export default function DocumentDetail({ documentId }) {
                   <dd>{process ? process.steps.length : '0'}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Étapes validées</dt>
-                  <dd>{document.history ? document.history.length : '0'}</dd>
+                  <dt className="text-gray-500">Tentatives de validation</dt>
+                  <dd>{historyCycles.length}</dd>
                 </div>
               </dl>
             </div>
@@ -102,38 +143,59 @@ export default function DocumentDetail({ documentId }) {
               <Separator />
               <div>
                 <h3 className="font-semibold mb-4">Historique de validation</h3>
-                <div className="space-y-4">
-                  {document.history.map((entry, index) => {
-                    const step = process?.steps.find(s => s.id === entry.stepId);
+                
+                {historyCycles.map((cycle, cycleIndex) => (
+                  <div key={cycleIndex} className="mb-6">
+                    <h4 className="font-medium text-gray-700 mb-2">
+                      Cycle de validation #{cycleIndex + 1}
+                      {cycle[cycle.length - 1].status === 'rejeté' && (
+                        <span className="text-red-500 ml-2">(Rejeté)</span>
+                      )}
+                    </h4>
                     
-                    return (
-                      <div key={index} className="flex items-start gap-4 py-2">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${entry.status === 'validé' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                          {entry.status === 'validé' ? '✓' : '✗'}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h4 className="font-medium">{step?.name || 'Étape inconnue'}</h4>
-                            <span className="text-sm text-gray-500">
-                              {format(new Date(entry.date), 'dd/MM/yyyy HH:mm')}
-                            </span>
+                    <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+                      {cycle.map((entry, entryIndex) => {
+                        const step = process?.steps.find(s => s.id === entry.stepId);
+                        
+                        return (
+                          <div key={entryIndex} className="flex items-start gap-4 py-2">
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${entry.status === 'validé' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                              {entry.status === 'validé' ? '✓' : '✗'}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between">
+                                <h4 className="font-medium">{step?.name || 'Étape inconnue'}</h4>
+                                <span className="text-sm text-gray-500">
+                                  {format(new Date(entry.date), 'dd/MM/yyyy HH:mm')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-gray-600">
+                                  Service: {getServiceName(entry.serviceId)}
+                                </p>
+                                {getStatusBadge(entry.status)}
+                              </div>
+                              <p className="text-sm text-gray-600">
+                                Action par: {entry.validatedBy}
+                              </p>
+                              {entry.comment && (
+                                <p className="mt-2 text-sm bg-gray-50 p-2 rounded">
+                                  {entry.comment}
+                                </p>
+                              )}
+                              
+                              {entry.status === 'rejeté' && (
+                                <div className="mt-2 text-sm text-red-500">
+                                  Le document a été renvoyé au début du processus
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-600">
-                            Service: {getServiceName(entry.serviceId)}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Validé par: {entry.validatedBy}
-                          </p>
-                          {entry.comment && (
-                            <p className="mt-2 text-sm bg-gray-50 p-2 rounded">
-                              {entry.comment}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}

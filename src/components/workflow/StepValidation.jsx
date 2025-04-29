@@ -74,11 +74,15 @@ export default function StepValidation({ documentId }) {
       }
     ];
     
+    // En cas de rejet, revenir à la première étape du processus
+    const firstStep = process.steps[0];
+    
     // Mettre à jour le document
     const updatedDocument = {
       ...document,
       history: updatedHistory,
-      status: 'rejeté'
+      currentStepId: firstStep.id, // Retour à la première étape
+      status: 'en cours' // Le document reste en cours de validation
     };
     
     updateDocument(updatedDocument);
