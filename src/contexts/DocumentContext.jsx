@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-
+import { testDocuments } from '../data/testData';
 export const DocumentContext = createContext();
 
 export const DocumentProvider = ({ children }) => {
@@ -12,26 +12,7 @@ export const DocumentProvider = ({ children }) => {
     setLoading(true);
     // Dans une application réelle, vous feriez un appel API ici
     setTimeout(() => {
-      setDocuments([
-        {
-          id: '1',
-          name: 'Contrat A',
-          startDate: new Date(),
-          endDate: new Date(new Date().setMonth(new Date().getMonth() + 6)),
-          processId: '1',
-          status: 'en cours',
-          currentStepId: '2',
-          history: [
-            { 
-              stepId: '1', 
-              serviceId: '1', 
-              validatedBy: 'John Doe', 
-              date: new Date(new Date().setDate(new Date().getDate() - 3)), 
-              status: 'validé' 
-            }
-          ]
-        }
-      ]);
+      setDocuments(testDocuments);
       setLoading(false);
     }, 1000);
   }, []);
