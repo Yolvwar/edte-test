@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Processes from './pages/Processes';
 import Validations from './pages/Validations';
+import DocumentPage from './pages/DocumentPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               <Route path="/documents" element={<Documents />} />
               <Route path="/processes" element={<Processes />} />
               <Route path="/validations" element={<Validations />} />
+              <Route path="/document/:id" element={<DocumentPage />} />
             </Routes>
           </MainLayout>
         </ProcessProvider>

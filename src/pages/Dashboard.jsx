@@ -94,7 +94,7 @@ export default function Dashboard() {
                   const currentStep = process?.steps.find(s => s.id === doc.currentStepId);
                   
                   return (
-                    <Alert key={doc.id} className="cursor-pointer" onClick={() => navigate(`/documents/${doc.id}`)}>
+                    <Alert key={doc.id} className="cursor-pointer" onClick={() => navigate(`/document/${doc.id}`)}>
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>{doc.name}</AlertTitle>
                       <AlertDescription>

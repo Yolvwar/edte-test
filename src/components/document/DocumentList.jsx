@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { DocumentContext } from '../../contexts/DocumentContext';
 import { ProcessContext } from '../../contexts/ProcessContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,9 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Trash2 } from 'lucide-react';
 
-export default function DocumentList({ onSelectDocument }) {
+export default function DocumentList() {
   const { documents, deleteDocument } = useContext(DocumentContext);
   const { processes } = useContext(ProcessContext);
+  const navigate = useNavigate();
 
   // Obtenir le nom du processus à partir de son ID
   const getProcessName = (processId) => {
@@ -32,6 +34,11 @@ export default function DocumentList({ onSelectDocument }) {
       default:
         return <Badge>{status}</Badge>;
     }
+  };
+
+  // Rediriger vers la page détaillée du document
+  const handleViewDocument = (documentId) => {
+    navigate(`/document/${documentId}`);
   };
 
   return (
@@ -67,7 +74,7 @@ export default function DocumentList({ onSelectDocument }) {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => onSelectDocument(doc.id)}
+                      onClick={() => handleViewDocument(doc.id)}
                     >
                       <Eye size={16} />
                     </Button>
